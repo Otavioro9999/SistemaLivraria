@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Livraria - Cadastro de Obra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2 id="titulo-formulario">Cadastro de Obra</h2>
+    <form id="formulario-obra">
+        <input type="hidden" id="obra-id">
+        
+        <label for="campo-titulo">Título 
+            <input type="text" id="campo-titulo" name="campo-titulo">
+        </label>
+        
+        <label for="campo-autor">Autor 
+            <input type="text" id="campo-autor" name="campo-autor">
+        </label>
+        
+        <label for="campo-ano">Ano de Publicação 
+            <input type="number" id="campo-ano" name="campo-ano">
+        </label>
+        
+        <label for="campo-genero">Gênero 
+            <input type="text" id="campo-genero" name="campo-genero">
+        </label>
+        
+        <label for="campo-idioma">Idioma 
+            <input type="text" id="campo-idioma" name="campo-idioma">
+        </label>
+        
+        <label for="campo-preco">Preço 
+            <input type="number" step="0.01" id="campo-preco" name="campo-preco">
+        </label>
+        
+        <button type="button" id="botao-salvar" onclick="cadastrarObra()">Cadastrar</button>
+        <button type="button" id="botao-editar" onclick="salvarEdicao()" style="display:none;">Salvar Edição</button>
+        <button type="button" onclick="resetarFormulario()">Limpar</button>
+        <button type="button" onclick="navegarParaLista()">Ver Lista de Obras</button>
+    </form>
+
+    <script>
+        function cadastrarObra(){
+            const titulo = document.getElementById('campo-titulo').value;
+            const autor = document.getElementById('campo-autor').value;
+            const ano = document.getElementById('campo-ano').value;
+            const genero = document.getElementById('campo-genero').value;
+            const idioma = document.getElementById('campo-idioma').value;
+            const preco = document.getElementById('campo-preco').value;
+
+            if(!titulo || !autor || !ano || !genero || !idioma || !preco){
+                alert("Preencha todos os campos corretamente!");
+                return;
+            }
+
+            fetch("http://localhost:3000/livros", {
+                method: "POST",
+                headers: {"Content-type": "application/json"},
+                body: JSON.stringify({
+                    titulo, autor, ano_publicacao: ano, genero, idioma, preco
+                })
+            })
+            .then(resposta => resposta.json())
+            .then(() => {
+                alert("Obra cadastrada com sucesso!");
+                resetarFormulario();
+            });
+        }
+
+        function salvarEdicao(){
+            const id = document.getElementById('obra-id').value;
+            const titulo = document.getElementById('campo-titulo').value;
+            const autor = document.getElementById('campo-autor').value;
+            const ano = document.getElementById('campo-ano').value;
+            const genero = document.getElementById('campo-genero').value;
+            const idioma = document.getElementById('campo-idioma').value;
+            const preco = document.getElementById('campo-preco').value;
+
+            fetch(`http://localhost:3000/livros/${id}`, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    titulo, autor, ano_publicacao: ano, genero, idioma, preco
+                })
+            })
+            .then(resposta => resposta.json())
+            .then(() => {
+                resetarFormulario();
+            });
+        }
+
+        function resetarFormulario(){
+            document.getElementById('formulario-obra').reset();
+            document.getElementById('obra-id').value = "";
+            document.getElementById('botao-salvar').style.display = "inline";
+            document.getElementById('botao-editar').style.display = "none";
+            document.getElementById('titulo-formulario').innerText = "Cadastro de Obra";
+        }
+
+        function navegarParaLista(){
+            window.location.href = "usuarios.html";
+        }
+    </script>
+</body>
+</html>
+

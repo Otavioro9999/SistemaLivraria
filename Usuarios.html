@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livros</title>
+    <link rel="stylesheet" href="usuarios.css">
+</head>
+<body>
+
+    <h2>Lista de Livros</h2>
+
+    <button class="btn-voltar" onclick="voltarParaCadastro()">Voltar para cadastro</button>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Ano de Publicação</th>
+                <th>Gênero</th>
+                <th>Idioma</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="corpo-tabela-livros">
+            <!-- Livros serão inseridos aqui -->
+        </tbody>
+    </table>
+
+<script>
+    function carregarListaLivros(){
+        fetch('http://localhost:3000/livros')
+        .then(resposta => resposta.json())
+        .then(listaLivros => {
+            const corpoTabela = document.getElementById('corpo-tabela-livros');
+            corpoTabela.innerHTML = "";
+            listaLivros.forEach(itemLivro => {
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
+                    <td>${itemLivro.id}</td>
+                    <td>${itemLivro.titulo}</td>
+                    <td>${itemLivro.autor}</td>
+                    <td>${itemLivro.ano_publicacao}</td>
+                    <td>${itemLivro.genero}</td>
+                    <td>${itemLivro.idioma}</td>
+                    <td>R$ ${Number(itemLivro.preco).toFixed(2)}</td>
+                    <td>
+                        <button onclick="exibirDetalhesLivro(${itemLivro.id})">Ver</button>
+                        <button onclick="atualizarLivro(${itemLivro.id})">Editar</button>
+                        <button onclick="removerLivro(${itemLivro.id})">Excluir</button>
+                    </td>
+                `;
+                corpoTabela.appendChild(linha);
+            });
+        });
+    }
+
+    function exibirDetalhesLivro(codigoLivro){
+        fetch(`http://localhost:3000/livros/${codigoLivro}`)
+            .then(resposta => resposta.json())
+            .then(dadosLivro => {
+                alert(
+                    `ID: ${dadosLivro.id}\nTítulo: ${dadosLivro.titulo}\nAutor: ${dadosLivro.autor}\nAno: ${dadosLivro.ano_publicacao}\nGênero: ${dadosLivro.genero}\nIdioma: ${dadosLivro.idioma}\nPreço: R$ ${Number(dadosLivro.preco).toFixed(2)}`
+                );
+            });
+    }
+
+    function atualizarLivro(codigoLivro){
+        let novoTitulo = prompt("Digite o título:");
+        let novoAutor = prompt("Digite o autor:");
+        let novoAno = prompt("Digite o ano de publicação:");
+        let novoGenero = prompt("Digite o gênero:");
+        let novoIdioma = prompt("Digite o idioma:");
+        let novoPreco = prompt("Digite o preço:");
+
+        if(!novoTitulo || !novoAutor || !novoAno || !novoGenero || !novoIdioma || !novoPreco){
+            alert("Preencha todos os campos corretamente!");
+            return;
+        }
+
+        fetch(`http://localhost:3000/livros/${codigoLivro}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                titulo: novoTitulo,
+                autor: novoAutor,
+                ano_publicacao: novoAno,
+                genero: novoGenero,
+                idioma: novoIdioma,
+                preco: novoPreco
+            })
+        })
+        .then(() => carregarListaLivros());
+    }
+
+    function removerLivro(codigoLivro){
+        if(confirm("Deseja realmente excluir este livro?")){
+            fetch(`http://localhost:3000/livros/${codigoLivro}`, {
+                method: "DELETE"
+            })
+            .then(() => carregarListaLivros());
+        }
+    }
+
+    function voltarParaCadastro(){
+        window.location.href = "index.html";
+    }
+
+    window.onload = carregarListaLivros;
+</script>
+
+</body>
+</html>
